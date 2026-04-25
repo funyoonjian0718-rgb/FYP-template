@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login — Dietary Advice RAG</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <div class="title">FYP — Context-Aware Dietary Advice (RAG)</div>
+          <div class="muted">Login to access the dietary recommendation system</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card" style="max-width: 400px; margin: 0 auto;">
+          <div class="cardTitle">Login</div>
+          <div class="row">
+            <div>
+              <label>Email</label>
+              <input id="loginEmail" placeholder="you@example.com" />
+            </div>
+          </div>
+          <div class="row mt12">
+            <div>
+              <label>Password</label>
+              <input id="loginPassword" type="password" placeholder="••••••••" />
+            </div>
+          </div>
+          <div class="actions mt12">
+            <button id="btnLogin">Login</button>
+            <div id="loginMsg" class="muted"></div>
+          </div>
+          <div class="muted mt16" style="text-align: center;">
+            Don't have an account? 
+            <a href="/register" style="color: #4f46e5;">Register here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const state = {
+        token: localStorage.getItem("token") || "",
+      };
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      async function api(path, { method = "GET", body = null } = {}) {
+        const headers = { "Content-Type": "application/json" };
+        if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+        const res = await fetch(path, {
+          method,
+          headers,
+          body: body ? JSON.stringify(body) : null,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data?.detail ? String(data.detail) : `HTTP ${res.status}`;
+          throw new Error(msg);
+        }
+        return data;
+      }
+
+      // Check if already logged in
+      if (state.token) {
+        window.location.href = "/";
+      }
+
+      $("btnLogin").addEventListener("click", async () => {
+        const msg = $("loginMsg");
+        msg.textContent = "";
+        try {
+          const payload = {
+            email: $("loginEmail").value.trim(),
+            password: $("loginPassword").value,
+          };
+          const data = await api("/auth/login", { method: "POST", body: payload });
+          state.token = data.access_token;
+          localStorage.setItem("token", state.token);
+          msg.textContent = "Logged in! Redirecting...";
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 500);
+        } catch (e) {
+          msg.innerHTML = `<span class="danger">${escapeHtml(e.message)}</span>`;
+        }
+      });
+
+      // Allow Enter key to submit
+      $("loginPassword").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") $("btnLogin").click();
+      });
+    </script>
+  </body>
+</html>

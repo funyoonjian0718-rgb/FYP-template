@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dietary Advice — RAG Query</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <div class="title">FYP — Context-Aware Dietary Advice (RAG)</div>
+          <div class="muted">Local prototype (FastAPI + Chroma + SentenceTransformers + Ollama)</div>
+        </div>
+        <div>
+          <span id="authStatus" class="pill">Logged in</span>
+          <button id="btnLogout" class="secondary" style="margin-left: 10px;">Logout</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="cardTitle">Ask a dietary question</div>
+          <div class="row">
+            <div>
+              <label>Dropdown dish (recommended)</label>
+              <select id="foodDropdown"></select>
+            </div>
+            <div>
+              <label>Portion</label>
+              <select id="portion">
+                <option value="">(not set)</option>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt12">
+            <label>Optional free-text food</label>
+            <input id="freeFood" placeholder="e.g., nasi lemak + teh tarik" />
+          </div>
+          <div class="mt12">
+            <label>Your question</label>
+            <textarea id="question" placeholder="e.g., Is nasi lemak okay for someone with Type 2 diabetes?"></textarea>
+          </div>
+          <div class="actions mt12">
+            <button id="btnAsk">Get recommendation</button>
+            <button id="btnHistory" class="secondary">Load history (latest 10)</button>
+            <div id="askMsg" class="muted"></div>
+          </div>
+          <div class="muted mt10">
+            Tip: run Ollama and pull a model (e.g. <span class="mono">ollama pull llama3.1:8b-instruct</span>) before asking queries.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardTitle">Answer</div>
+          <div id="answer" class="mono muted">No answer yet.</div>
+
+          <div class="sectionTitle">Retrieved references</div>
+          <div id="refs" class="muted"></div>
+
+          <div class="sectionTitle">History</div>
+          <div id="history" class="muted">Not loaded.</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const state = {
+        token: localStorage.getItem("token") || "",
+      };
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      async function api(path, { method = "GET", body = null } = {}) {
+        const headers = { "Content-Type": "application/json" };
+        if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+        const res = await fetch(path, {
+          method,
+          headers,
+          body: body ? JSON.stringify(body) : null,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data?.detail ? String(data.detail) : `HTTP ${res.status}`;
+          throw new Error(msg);
+        }
+        return data;
+      }
+
+      // Check if not logged in - redirect to login
+      if (!state.token) {
+        window.location.href = "/login";
+      }
+
+      async function loadFoods() {
+        const dd = $("foodDropdown");
+        dd.innerHTML = "";
+        try {
+          const foods = await api("/diet/foods");
+          const opt0 = document.createElement("option");
+          opt0.value = "";
+          opt0.textContent = "(not selected)";
+          dd.appendChild(opt0);
+          for (const f of foods) {
+            const opt = document.createElement("option");
+            opt.value = f;
+            opt.textContent = f;
+            dd.appendChild(opt);
+          }
+        } catch (e) {
+          console.error("Failed to load foods:", e);
+        }
+      }
+
+      // Load foods on page load
+      loadFoods();
+
+      $("btnLogout").addEventListener("click", () => {
+        state.token = "";
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      });
+
+      $("btnAsk").addEventListener("click", async () => {
+        const msg = $("askMsg");
+        msg.textContent = "";
+        $("answer").textContent = "Working…";
+        $("refs").textContent = "";
+        try {
+          const payload = {
+            query_text: $("question").value.trim(),
+            selected_food: $("foodDropdown").value || null,
+            portion: $("portion").value || null,
+            free_text_food: $("freeFood").value.trim() || null,
+          };
+          const data = await api("/diet/query", { method: "POST", body: payload });
+          $("answer").textContent = data.formatted_answer;
+          const refs = data.references || [];
+          if (!refs.length) {
+            $("refs").textContent = "(no references retrieved)";
+          } else {
+            $("refs").innerHTML = refs
+              .map(
+                (r) => `
+                <div style="margin-bottom:10px;">
+                  <div><b>${escapeHtml(r.source)}</b></div>
+                  <div class="mono">${escapeHtml(r.snippet)}</div>
+                </div>`
+              )
+              .join("");
+          }
+          msg.textContent = "Done.";
+        } catch (e) {
+          $("answer").innerHTML = `<span class="danger">${escapeHtml(e.message)}</span>`;
+          msg.innerHTML = `<span class="danger">Error: ${escapeHtml(e.message)}</span>`;
+        }
+      });
+
+      $("btnHistory").addEventListener("click", async () => {
+        const el = $("history");
+        el.textContent = "Loading…";
+        try {
+          const rows = await api("/diet/history");
+          if (!rows.length) {
+            el.textContent = "(no history yet)";
+            return;
+          }
+          el.innerHTML = rows
+            .map(
+              (r) => `
+              <div style="border:1px solid #223155;border-radius:10px;padding:10px;margin-bottom:10px;">
+                <div class="muted">${escapeHtml(r.created_at)}</div>
+                <div><b>Q:</b> ${escapeHtml(r.query_text)}</div>
+                <div><b>Food:</b> ${escapeHtml(r.selected_food || "-")}</div>
+                <div class="mono" style="margin-top:5px;">${escapeHtml(r.response_text)}</div>
+              </div>`
+            )
+            .join("");
+        } catch (e) {
+          el.innerHTML = `<span class="danger">${escapeHtml(e.message)}</span>`;
+        }
+      });
+    </script>
+  </body>
+</html>
+

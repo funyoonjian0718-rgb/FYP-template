@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Register — Dietary Advice RAG</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <div class="title">FYP — Context-Aware Dietary Advice (RAG)</div>
+          <div class="muted">Create an account to get personalized dietary recommendations</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card" style="max-width: 500px; margin: 0 auto;">
+          <div class="cardTitle">Register</div>
+          <div class="row">
+            <div>
+              <label>Email *</label>
+              <input id="regEmail" placeholder="you@example.com" />
+            </div>
+            <div>
+              <label>Password (min 8 chars) *</label>
+              <input id="regPassword" type="password" placeholder="••••••••" />
+            </div>
+          </div>
+          <div class="row mt12">
+            <div>
+              <label>Type 2 Diabetes *</label>
+              <select id="regT2">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div>
+              <label>Activity level</label>
+              <select id="regActivity">
+                <option value="">(not set)</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="row mt12">
+            <div>
+              <label>Age</label>
+              <input id="regAge" type="number" min="1" max="120" placeholder="e.g., 22" />
+            </div>
+            <div>
+              <label>Weight (kg)</label>
+              <input id="regWeight" type="number" min="1" max="500" placeholder="e.g., 70" />
+            </div>
+          </div>
+          <div class="actions mt12">
+            <button id="btnRegister">Register</button>
+            <div id="regMsg" class="muted"></div>
+          </div>
+          <div class="muted mt16" style="text-align: center;">
+            Already have an account? 
+            <a href="/login" style="color: #4f46e5;">Login here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const state = {
+        token: localStorage.getItem("token") || "",
+      };
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      async function api(path, { method = "GET", body = null } = {}) {
+        const headers = { "Content-Type": "application/json" };
+        if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+        const res = await fetch(path, {
+          method,
+          headers,
+          body: body ? JSON.stringify(body) : null,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data?.detail ? String(data.detail) : `HTTP ${res.status}`;
+          throw new Error(msg);
+        }
+        return data;
+      }
+
+      // Check if already logged in - redirect to main page
+      if (state.token) {
+        window.location.href = "/";
+      }
+
+      $("btnRegister").addEventListener("click", async () => {
+        const msg = $("regMsg");
+        msg.textContent = "";
+        
+        // Basic validation
+        const email = $("regEmail").value.trim();
+        const password = $("regPassword").value;
+        
+        if (!email) {
+          msg.innerHTML = `<span class="danger">Email is required</span>`;
+          return;
+        }
+        if (!password || password.length < 8) {
+          msg.innerHTML = `<span class="danger">Password must be at least 8 characters</span>`;
+          return;
+        }
+        
+        try {
+          const payload = {
+            email: email,
+            password: password,
+            type2_diabetes: $("regT2").value === "true",
+            age: $("regAge").value ? Number($("regAge").value) : null,
+            weight_kg: $("regWeight").value ? Number($("regWeight").value) : null,
+            activity_level: $("regActivity").value || null,
+          };
+          
+          const data = await api("/auth/register", { method: "POST", body: payload });
+          state.token = data.access_token;
+          localStorage.setItem("token", state.token);
+          msg.textContent = "Registered successfully! Redirecting...";
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 500);
+        } catch (e) {
+          msg.innerHTML = `<span class="danger">${escapeHtml(e.message)}</span>`;
+        }
+      });
+    </script>
+  </body>
+</html>
