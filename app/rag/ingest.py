@@ -2,7 +2,6 @@ import glob
 import os
 import uuid
 
-from app.core.settings import settings
 from app.rag.mysql_embeddings import MySQLEmbeddingService
 
 
@@ -46,10 +45,6 @@ def main() -> None:
     # Store in MySQL instead of Chroma
     emb_service.add_chunks(documents, metadatas, ids)
     print(f"Ingested {len(documents)} chunks into MySQL embeddings table")
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":

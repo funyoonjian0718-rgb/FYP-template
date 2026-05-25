@@ -5,9 +5,7 @@ import json
 import uuid
 
 import numpy as np
-from sqlalchemy import select
 
-from app.core.settings import settings
 from app.db.models_embeddings import Embedding
 from app.db.session import SessionLocal
 from app.rag.embedding import EmbeddingService
