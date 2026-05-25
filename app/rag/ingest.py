@@ -2,15 +2,8 @@ import glob
 import os
 import uuid
 
-# Disable ChromaDB telemetry completely
-os.environ["ANONYMIZED_TELEMETRY"] = "False"
-os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
-
-import chromadb
-from chromadb.config import Settings
-
 from app.core.settings import settings
-from app.rag.embedding import EmbeddingService
+from app.rag.mysql_embeddings import MySQLEmbeddingService
 
 
 def _chunk_text(text: str, *, chunk_size: int = 700, overlap: int = 120) -> list[str]:
@@ -31,15 +24,8 @@ def _chunk_text(text: str, *, chunk_size: int = 700, overlap: int = 120) -> list
 
 
 def main() -> None:
-    os.makedirs(settings.chroma_dir, exist_ok=True)
-    emb = EmbeddingService()
-    # Use settings with telemetry disabled
-    client = chromadb.PersistentClient(
-        path=settings.chroma_dir,
-        settings=Settings(anonymized_telemetry=False)
-    )
-    col = client.get_or_create_collection(name="fyp_kb", metadata={"hnsw:space": "cosine"})
-
+    emb_service = MySQLEmbeddingService()
+    
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
     paths = glob.glob(os.path.join(base_dir, "*.md")) + glob.glob(os.path.join(base_dir, "*.txt"))
     if not paths:
@@ -57,9 +43,13 @@ def main() -> None:
             metadatas.append({"source": os.path.basename(p)})
             ids.append(str(uuid.uuid4()))
 
-    embeddings = emb.embed(documents)
-    col.add(ids=ids, documents=documents, metadatas=metadatas, embeddings=embeddings)
-    print(f"Ingested {len(documents)} chunks into {settings.chroma_dir}")
+    # Store in MySQL instead of Chroma
+    emb_service.add_chunks(documents, metadatas, ids)
+    print(f"Ingested {len(documents)} chunks into MySQL embeddings table")
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":
