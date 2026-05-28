@@ -13,7 +13,8 @@
     "glycemic_index": "High",
     "health_advice": "Limit to occasional treat. Choose less coconut rice, add vegetables, opt for grilled instead of fried fish.",
     "diabetes_suitable": false,
-    "alternatives": "Nasi putih with vegetables, brown rice, quinoa"
+    "alternatives": "Nasi putih with vegetables, brown rice, quinoa",
+    "price_myr": 6.0
   },
   {
     "name": "Roti Canai",
@@ -29,7 +30,8 @@
     "glycemic_index": "High",
     "health_advice": "Limit to 2 pieces. Pair with dhal instead of coconut curry. Choose whole wheat version if available.",
     "diabetes_suitable": false,
-    "alternatives": "Whole wheat roti, toast with peanut butter"
+    "alternatives": "Whole wheat roti, toast with peanut butter",
+    "price_myr": 1.8
   },
   {
     "name": "Char Kuey Teow",
@@ -45,7 +47,8 @@
     "glycemic_index": "High",
     "health_advice": "High in fat and calories. Request less oil, add more bean sprouts, choose shrimp over liver. Occasional treat only.",
     "diabetes_suitable": false,
-    "alternatives": "Stir-fried kangkung, steamed vegetables"
+    "alternatives": "Stir-fried kangkung, steamed vegetables",
+    "price_myr": 7.5
   },
   {
     "name": "Teh Tarik",
@@ -61,7 +64,8 @@
     "glycemic_index": "High",
     "health_advice": "High sugar and saturated fat from condensed milk. Limit to occasional. Ask for less sugar, use low-fat milk.",
     "diabetes_suitable": false,
-    "alternatives": "Plain tea (no milk), unsweetened coffee"
+    "alternatives": "Plain tea (no milk), unsweetened coffee",
+    "price_myr": 2.2
   },
   {
     "name": "Laksa (Curry)",
@@ -77,7 +81,8 @@
     "glycemic_index": "High",
     "health_advice": "High saturated fat from coconut milk. Choose Asam Laksa instead (fish-based, lighter). Add extra vegetables.",
     "diabetes_suitable": false,
-    "alternatives": "Asam Laksa, mee soup with vegetables"
+    "alternatives": "Asam Laksa, mee soup with vegetables",
+    "price_myr": 7.0
   },
   {
     "name": "Mee Goreng",
@@ -93,7 +98,8 @@
     "glycemic_index": "High",
     "health_advice": "Request less oil and sauce. Add vegetables for bulk. Choose whole grain mee if available.",
     "diabetes_suitable": false,
-    "alternatives": "Mee soup, stir-fried vegetables with rice"
+    "alternatives": "Mee soup, stir-fried vegetables with rice",
+    "price_myr": 6.8
   },
   {
     "name": "Nasi Goreng",
@@ -109,7 +115,8 @@
     "glycemic_index": "High",
     "health_advice": "Use less oil, add more vegetables, choose chicken over prawn paste. Limit to occasional.",
     "diabetes_suitable": false,
-    "alternatives": "Nasi putih with stir-fried vegetables"
+    "alternatives": "Nasi putih with stir-fried vegetables",
+    "price_myr": 6.5
   },
   {
     "name": "Hainanese Chicken Rice",
@@ -125,7 +132,8 @@
     "glycemic_index": "Medium-High",
     "health_advice": "Relatively healthier option. Choose steamed chicken over fried. Limit rice to 1 cup. Add vegetables.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Brown rice, chicken with vegetables"
+    "alternatives": "Brown rice, chicken with vegetables",
+    "price_myr": 7.5
   },
   {
     "name": "Satay",
@@ -141,7 +149,8 @@
     "glycemic_index": "Low",
     "health_advice": "Good protein source. Choose chicken or beef over pork. Limit peanut sauce. Eat with cucumber and onion.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Grilled chicken, kebabs"
+    "alternatives": "Grilled chicken, kebabs",
+    "price_myr": 6.0
   },
   {
     "name": "Rendang",
@@ -157,7 +166,8 @@
     "glycemic_index": "Low",
     "health_advice": "High in saturated fat from coconut milk. Choose lean meat, remove visible fat. Eat with vegetables, limit rice.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Lean beef curry, chicken curry (less coconut)"
+    "alternatives": "Lean beef curry, chicken curry (less coconut)",
+    "price_myr": 8.0
   },
   {
     "name": "Kuih-Muih (Assorted)",
@@ -173,7 +183,8 @@
     "glycemic_index": "High",
     "health_advice": "Often high in sugar and fat. Choose steamed over fried varieties. Limit portion to 1-2 pieces.",
     "diabetes_suitable": false,
-    "alternatives": "Fresh fruit, nuts, yogurt"
+    "alternatives": "Fresh fruit, nuts, yogurt",
+    "price_myr": 3.0
   },
   {
     "name": "Cendol",
@@ -189,7 +200,8 @@
     "glycemic_index": "High",
     "health_advice": "High sugar and fat from coconut milk and palm sugar. Best to avoid, especially for diabetes.",
     "diabetes_suitable": false,
-    "alternatives": "Fresh fruit,冰凉的西瓜 (chilled watermelon)"
+    "alternatives": "Fresh fruit,冰凉的西瓜 (chilled watermelon)",
+    "price_myr": 4.0
   },
   {
     "name": "Nasi Putih",
@@ -205,7 +217,8 @@
     "glycemic_index": "High",
     "health_advice": "Control portion to 1 cup per meal. Choose brown rice or add vegetables for more fibre.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Brown rice, red rice, quinoa"
+    "alternatives": "Brown rice, red rice, quinoa",
+    "price_myr": 0.6
   },
   {
     "name": "Mee",
@@ -221,7 +234,8 @@
     "glycemic_index": "High",
     "health_advice": "Choose whole grain mee if available. Limit portion, add vegetables. Avoid heavy sauces.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Whole grain noodles, rice noodles"
+    "alternatives": "Whole grain noodles, rice noodles",
+    "price_myr": 0.8
   },
   {
     "name": "Kangkung (Water Spinach)",
@@ -237,7 +251,8 @@
     "glycemic_index": "Low",
     "health_advice": "Excellent low-calorie vegetable. Rich in iron and vitamins. Prepare with minimal oil and less belacan.",
     "diabetes_suitable": true,
-    "alternatives": "Other leafy greens: bayam, sawi, kale"
+    "alternatives": "Other leafy greens: bayam, sawi, kale",
+    "price_myr": 2.5
   },
   {
     "name": "Sambal Belacan",
@@ -253,7 +268,8 @@
     "glycemic_index": "Low",
     "health_advice": "High sodium from belacan. Use sparingly. Can be high in cholesterol if made with shrimp paste.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Chili sauce with less sodium, fresh chili"
+    "alternatives": "Chili sauce with less sodium, fresh chili",
+    "price_myr": 0.5
   },
   {
     "name": "Ayam Goreng (Fried Chicken)",
@@ -269,7 +285,8 @@
     "glycemic_index": "Low",
     "health_advice": "Remove skin to reduce fat. Choose grilled or baked over fried. Better than processed chicken nuggets.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Grilled chicken, steamed chicken"
+    "alternatives": "Grilled chicken, steamed chicken",
+    "price_myr": 5.0
   },
   {
     "name": "Ikan Bakar (Grilled Fish)",
@@ -285,7 +302,8 @@
     "glycemic_index": "Low",
     "health_advice": "Excellent protein source. Choose local fish (ikan kembung, selar). Use minimal sauce.",
     "diabetes_suitable": true,
-    "alternatives": "Steamed fish, fish soup"
+    "alternatives": "Steamed fish, fish soup",
+    "price_myr": 8.0
   },
   {
     "name": "Telur (Egg)",
@@ -301,7 +319,8 @@
     "glycemic_index": "Low",
     "health_advice": "Good protein and nutrients. Limit to 4-5 eggs per week if cholesterol is a concern. Choose boiled over fried.",
     "diabetes_suitable": true,
-    "alternatives": "Boiled egg, omelette with vegetables"
+    "alternatives": "Boiled egg, omelette with vegetables",
+    "price_myr": 0.8
   },
   {
     "name": "Tahu (Tofu)",
@@ -317,7 +336,8 @@
     "glycemic_index": "Low",
     "health_advice": "Excellent plant protein. Low in calories. Good for heart health. Include regularly in diet.",
     "diabetes_suitable": true,
-    "alternatives": "Tempeh, soy milk"
+    "alternatives": "Tempeh, soy milk",
+    "price_myr": 2.0
   },
   {
     "name": "Tempeh",
@@ -333,7 +353,8 @@
     "glycemic_index": "Low",
     "health_advice": "High protein and fibre. Fermented, good for gut health. Excellent meat alternative.",
     "diabetes_suitable": true,
-    "alternatives": "Tofu, lean meat"
+    "alternatives": "Tofu, lean meat",
+    "price_myr": 2.5
   },
   {
     "name": "Pisang (Banana)",
@@ -349,7 +370,8 @@
     "glycemic_index": "Medium",
     "health_advice": "Choose slightly unripe for more resistant starch. Good potassium source. Limit to 1 per serving.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Apple, orange, guava"
+    "alternatives": "Apple, orange, guava",
+    "price_myr": 1.2
   },
   {
     "name": "Betik (Papaya)",
@@ -365,7 +387,8 @@
     "glycemic_index": "Low",
     "health_advice": "Low GI, good for diabetes. Rich in vitamin A and digestive enzymes. Excellent daily fruit choice.",
     "diabetes_suitable": true,
-    "alternatives": "Guava, watermelon, apple"
+    "alternatives": "Guava, watermelon, apple",
+    "price_myr": 2.5
   },
   {
     "name": "Jambu (Guava)",
@@ -381,7 +404,8 @@
     "glycemic_index": "Low",
     "health_advice": "Very high in vitamin C and fibre. Low GI. Excellent fruit for diabetes management.",
     "diabetes_suitable": true,
-    "alternatives": "Papaya, apple, orange"
+    "alternatives": "Papaya, apple, orange",
+    "price_myr": 2.0
   },
   {
     "name": "Tembikai (Watermelon)",
@@ -397,7 +421,8 @@
     "glycemic_index": "Medium",
     "health_advice": "Hydrating, good for hot weather. Consume in moderation due to moderate GI. Eat with protein for balance.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Papaya, guava, strawberry"
+    "alternatives": "Papaya, guava, strawberry",
+    "price_myr": 1.8
   },
   {
     "name": "Mangga (Mango)",
@@ -413,7 +438,8 @@
     "glycemic_index": "High",
     "health_advice": "High GI, consume in moderation. Eat with protein (yogurt, nuts) to slow absorption. Limit to 1/2 cup.",
     "diabetes_suitable": false,
-    "alternatives": "Papaya, guava, apple"
+    "alternatives": "Papaya, guava, apple",
+    "price_myr": 3.5
   },
   {
     "name": "Durian",
@@ -429,7 +455,8 @@
     "glycemic_index": "Medium",
     "health_advice": "High calorie and fat. Consume very small portions (2 seeds max). Avoid if watching weight or diabetes.",
     "diabetes_suitable": false,
-    "alternatives": "Papaya, guava, banana (unripe)"
+    "alternatives": "Papaya, guava, banana (unripe)",
+    "price_myr": 6.0
   },
   {
     "name": "Air Kosong (Water)",
@@ -445,7 +472,8 @@
     "glycemic_index": "N/A",
     "health_advice": "Drink 8 glasses daily. Essential for hydration, kidney function, and metabolism.",
     "diabetes_suitable": true,
-    "alternatives": "Coconut water, barley water (unsweetened)"
+    "alternatives": "Coconut water, barley water (unsweetened)",
+    "price_myr": 0.2
   },
   {
     "name": "Teh O (Tea without milk)",
@@ -461,7 +489,8 @@
     "glycemic_index": "Low",
     "health_advice": "No sugar or milk - excellent choice. Contains antioxidants. Limit to 2-3 cups daily.",
     "diabetes_suitable": true,
-    "alternatives": "Coffee without sugar, herbal tea"
+    "alternatives": "Coffee without sugar, herbal tea",
+    "price_myr": 1.2
   },
   {
     "name": "Kopi O (Coffee without milk)",
@@ -477,7 +506,8 @@
     "glycemic_index": "Low",
     "health_advice": "No sugar or milk - good choice. Limit caffeine to 2-3 cups daily. Avoid late evening.",
     "diabetes_suitable": true,
-    "alternatives": "Tea, herbal drinks"
+    "alternatives": "Tea, herbal drinks",
+    "price_myr": 1.5
   },
   {
     "name": "Susu Rendah Lemak (Low-fat Milk)",
@@ -493,7 +523,8 @@
     "glycemic_index": "Medium",
     "health_advice": "Good calcium source. Choose low-fat or skim. Good for bone health.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Soy milk (fortified), almond milk"
+    "alternatives": "Soy milk (fortified), almond milk",
+    "price_myr": 3.0
   },
   {
     "name": "Yogurt (Plain)",
@@ -509,7 +540,8 @@
     "glycemic_index": "Low",
     "health_advice": "Good probiotics for gut health. Choose plain, low-fat. Can help with digestion.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Greek yogurt, soy yogurt"
+    "alternatives": "Greek yogurt, soy yogurt",
+    "price_myr": 4.0
   },
   {
     "name": "Santan (Coconut Milk)",
@@ -525,7 +557,8 @@
     "glycemic_index": "Low",
     "health_advice": "High in saturated fat. Use sparingly. Consider light coconut milk for cooking.",
     "diabetes_suitable": false,
-    "alternatives": "Low-fat milk, coconut cream (less fat)"
+    "alternatives": "Low-fat milk, coconut cream (less fat)",
+    "price_myr": 0.8
   },
   {
     "name": "Ubi Keledek (Sweet Potato)",
@@ -541,7 +574,8 @@
     "glycemic_index": "Medium",
     "health_advice": "Better than white potato - more fibre and nutrients. Choose orange-fleshed for vitamin A.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Sweet potato, taro, yam"
+    "alternatives": "Sweet potato, taro, yam",
+    "price_myr": 1.0
   },
   {
     "name": "Sagu",
@@ -557,7 +591,8 @@
     "glycemic_index": "High",
     "health_advice": "Pure carbohydrate, low nutrients. Use in moderation. Often used in desserts.",
     "diabetes_suitable": false,
-    "alternatives": "Sago with coconut milk (limited)"
+    "alternatives": "Sago with coconut milk (limited)",
+    "price_myr": 0.7
   },
   {
     "name": "Bihun (Rice Vermicelli)",
@@ -573,7 +608,8 @@
     "glycemic_index": "High",
     "health_advice": "Light option but high GI. Add vegetables and protein for balance.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Rice noodles, glass noodles"
+    "alternatives": "Rice noodles, glass noodles",
+    "price_myr": 0.9
   },
   {
     "name": "Kuey Teow (Flat Rice Noodles)",
@@ -589,7 +625,8 @@
     "glycemic_index": "High",
     "health_advice": "High GI carbohydrate. Add vegetables and protein. Avoid heavy sauces.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Whole grain noodles, vegetable noodles"
+    "alternatives": "Whole grain noodles, vegetable noodles",
+    "price_myr": 0.9
   },
   {
     "name": "Satay Sauce (Kuah Kacang)",
@@ -605,7 +642,8 @@
     "glycemic_index": "Low",
     "health_advice": "High in fat and sodium. Use sparingly. Can be high in added sugars.",
     "diabetes_suitable": false,
-    "alternatives": "Less sauce, plain chili"
+    "alternatives": "Less sauce, plain chili",
+    "price_myr": 1.0
   },
   {
     "name": "Sambal Sauce",
@@ -621,7 +659,8 @@
     "glycemic_index": "Low",
     "health_advice": "High sodium. Use sparingly. Check for added sugars in some varieties.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Fresh chili, less sambal"
+    "alternatives": "Fresh chili, less sambal",
+    "price_myr": 0.3
   },
   {
     "name": "Nasi Tomato (Tomato Rice)",
@@ -637,7 +676,8 @@
     "glycemic_index": "High",
     "health_advice": "Often made with coconut milk. Choose without or with less. Add vegetables.",
     "diabetes_suitable": false,
-    "alternatives": "Nasi putih, brown rice"
+    "alternatives": "Nasi putih, brown rice",
+    "price_myr": 5.0
   },
   {
     "name": "Nasi Dagang",
@@ -653,7 +693,8 @@
     "glycemic_index": "Medium",
     "health_advice": "Made with coconut and fish. Traditional dish from Terengganu. Limit portion.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Nasi putih, nasi berlauk"
+    "alternatives": "Nasi putih, nasi berlauk",
+    "price_myr": 7.0
   },
   {
     "name": "Keropok Lekor",
@@ -669,7 +710,8 @@
     "glycemic_index": "Medium",
     "health_advice": "High in sodium and fat. Deep fried. Occasional snack only.",
     "diabetes_suitable": false,
-    "alternatives": "Baked chips, nuts, fruit"
+    "alternatives": "Baked chips, nuts, fruit",
+    "price_myr": 3.5
   },
   {
     "name": "Popcorn",
@@ -685,7 +727,8 @@
     "glycemic_index": "Low-Medium",
     "health_advice": "Better than chips. Choose air-popped without butter. Watch portion.",
     "diabetes_suitable": "Partial",
-    "alternatives": "Roasted chickpeas, nuts"
+    "alternatives": "Roasted chickpeas, nuts",
+    "price_myr": 1.5
   },
   {
     "name": "Kacang (Peanuts)",
@@ -701,7 +744,8 @@
     "glycemic_index": "Low",
     "health_advice": "Good healthy fats and protein. Choose unsalted. Good snack for diabetes.",
     "diabetes_suitable": true,
-    "alternatives": "Almonds, walnuts, mixed nuts"
+    "alternatives": "Almonds, walnuts, mixed nuts",
+    "price_myr": 2.0
   },
   {
     "name": "Epal (Apple)",
@@ -717,7 +761,8 @@
     "glycemic_index": "Low",
     "health_advice": "Low GI, good fibre. Excellent daily fruit. Keep skin for more fibre.",
     "diabetes_suitable": true,
-    "alternatives": "Pear, orange, guava"
+    "alternatives": "Pear, orange, guava",
+    "price_myr": 3.0
   },
   {
     "name": "Limau (Orange)",
@@ -733,6 +778,7 @@
     "glycemic_index": "Low",
     "health_advice": "Low GI, high vitamin C. Good daily fruit choice. Eat whole, not juice.",
     "diabetes_suitable": true,
-    "alternatives": "Grapefruit, apple, guava"
+    "alternatives": "Grapefruit, apple, guava",
+    "price_myr": 2.5
   }
 ]

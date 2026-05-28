@@ -13,6 +13,24 @@ class ReferenceSnippet(BaseModel):
     snippet: str
 
 
+class FoodNutritionResponse(BaseModel):
+    name: str
+    category: str | None = None
+    serving_size: str | None = None
+    calories: int | None = None
+    carbohydrates_g: float | None = None
+    protein_g: float | None = None
+    fat_g: float | None = None
+    fibre_g: float | None = None
+    sugar_g: float | None = None
+    sodium_mg: int | None = None
+    glycemic_index: str | None = None
+    health_advice: str | None = None
+    diabetes_suitable: bool | str | None = None
+    alternatives: str | None = None
+    price_myr: float | None = None
+
+
 class DietaryQueryResponse(BaseModel):
     formatted_answer: str
     references: list[ReferenceSnippet]

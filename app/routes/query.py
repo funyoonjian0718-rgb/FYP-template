@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 from fastapi import APIRouter, Depends
 from fastapi import HTTPException
@@ -9,11 +10,36 @@ from sqlalchemy.orm import Session
 from app.auth.deps import get_current_user
 from app.db.models import QueryHistory, User
 from app.db.session import get_db
-from app.rag.schemas import DietaryQueryRequest, DietaryQueryResponse, ReferenceSnippet
+from app.rag.schemas import (
+    DietaryQueryRequest,
+    DietaryQueryResponse,
+    FoodNutritionResponse,
+    ReferenceSnippet,
+)
 from app.rag.service import rag_service
 
 
 router = APIRouter()
+
+
+def _data_directory() -> str:
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
+
+
+def _load_food_data() -> list[dict]:
+    path = Path(_data_directory()) / "foods.json"
+    if not path.exists():
+        return []
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _find_food_metadata(food_name: str) -> dict | None:
+    food_name = food_name.strip().lower()
+    for item in _load_food_data():
+        if isinstance(item, dict) and item.get("name", "").strip().lower() == food_name:
+            return item
+    return None
 
 
 @router.get("/foods")
@@ -32,18 +58,17 @@ def foods() -> list[str]:
     return []
 
 
-@router.get("/foods/{food_name}")
+@router.get("/foods/{food_name}", response_model=FoodNutritionResponse)
 def food_details(food_name: str) -> dict | None:
     """Get detailed nutrition information for a specific food."""
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
-    path = os.path.join(base_dir, "foods.json")
-    if not os.path.exists(path):
+    path = Path(_data_directory()) / "foods.json"
+    if not path.exists():
         return None
-    with open(path, "r", encoding="utf-8") as f:
+    with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
     if isinstance(data, list):
         for item in data:
-            if isinstance(item, dict) and item.get("name", "").lower() == food_name.lower():
+            if isinstance(item, dict) and item.get("name", "").strip().lower() == food_name.strip().lower():
                 return item
     return None
 
@@ -74,11 +99,23 @@ def dietary_query(
         "free_text_food": payload.free_text_food,
     }
 
+    food_metadata: list[dict] = []
+    if payload.selected_food:
+        selected = _find_food_metadata(payload.selected_food)
+        if selected:
+            food_metadata.append(selected)
+
+    if payload.free_text_food:
+        free_food = _find_food_metadata(payload.free_text_food)
+        if free_food and free_food not in food_metadata:
+            food_metadata.append(free_food)
+
     formatted, retrieved = rag_service.answer(
         user_context=user_context,
         question=enriched_question,
         selected_food=payload.selected_food,
         portion=payload.portion,
+        food_metadata=food_metadata or None,
     )
 
     history = QueryHistory(
