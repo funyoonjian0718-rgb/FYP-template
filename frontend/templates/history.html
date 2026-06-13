@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History - NutriDiag</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><div class="sidebar-logo">🥗</div><div class="sidebar-title"><h2>NutriDiag</h2><p>Dietary Assistant</p></div></div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" href="/dashboard">📊 Dashboard</a>
+        <a class="nav-item" href="/ask">❓ Ask Recommendation</a>
+        <a class="nav-item active" href="/history">📜 My History</a>
+        <a class="nav-item" href="/profile">👤 My Profile</a>
+      </nav>
+      <div class="sidebar-footer"><div class="user-profile-mini"><div class="user-avatar" id="userAvatar">U</div><div class="user-info"><strong id="userEmail">user@example.com</strong><p>Logged in</p></div></div></div>
+    </aside>
+
+    <div class="main-content">
+      <div class="topbar"><div><div class="topbar-title">My History</div><div class="topbar-subtitle">Your previous queries</div></div><div class="topbar-actions"><button class="btn-logout" onclick="logout()">Logout</button></div></div>
+
+      <div style="padding:32px;"><div class="card"><div class="card-title">📜 Query History</div><div id="history">Loading history...</div><button class="btn btn-primary" onclick="loadHistory()" style="margin-top:16px">🔄 Refresh History</button></div></div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    async function initHistory(){
+      if(!state.token) window.location.href='/login';
+      document.getElementById('userAvatar').textContent = (state.user.email||'U')[0].toUpperCase();
+      document.getElementById('userEmail').textContent = state.user.email||'user@example.com';
+      await loadHistory();
+    }
+    initHistory();
+  </script>
+</body>
+</html>

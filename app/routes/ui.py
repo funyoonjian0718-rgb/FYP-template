@@ -25,3 +25,23 @@ def login_page(request: Request):
 def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
+
+@router.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
+def dashboard_page(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+@router.get("/ask", response_class=HTMLResponse, include_in_schema=False)
+def ask_page(request: Request):
+    return templates.TemplateResponse("ask.html", {"request": request})
+
+
+@router.get("/history", response_class=HTMLResponse, include_in_schema=False)
+def history_page(request: Request):
+    return templates.TemplateResponse("history.html", {"request": request})
+
+
+@router.get("/profile", response_class=HTMLResponse, include_in_schema=False)
+def profile_page(request: Request):
+    return templates.TemplateResponse("profile.html", {"request": request})
+
