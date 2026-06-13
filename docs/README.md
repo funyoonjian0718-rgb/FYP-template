@@ -137,7 +137,6 @@ python -m venv .venv
 pip install -r requirements.txt
 
 # 4. Ingest data into ChromaDB (first-time)
-# This loads foods.json + guidelines into ./vectorstore/
 python -m app.rag.ingest
 
 # Output should show:

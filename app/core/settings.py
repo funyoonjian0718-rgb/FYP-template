@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = 60 * 24 * 7  # 7 days (demo)
 
-    chroma_dir: str = "./chroma"
+    vectorstore_dir: str = "./vectorstore"
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     ollama_base_url: str = "http://localhost:11434"

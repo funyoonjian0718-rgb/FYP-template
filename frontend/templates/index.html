@@ -1,201 +1,507 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Dietary Advice — RAG Query</title>
-    <link rel="stylesheet" href="/static/css/style.css" />
-  </head>
-  <body>
-    <div class="wrap">
-      <div class="topbar">
-        <div>
-          <div class="title">FYP — Context-Aware Dietary Advice (RAG)</div>
-          <div class="muted">Local prototype (FastAPI + Chroma + SentenceTransformers + Ollama)</div>
-        </div>
-        <div>
-          <span id="authStatus" class="pill">Logged in</span>
-          <button id="btnLogout" class="secondary" style="margin-left: 10px;">Logout</button>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriDiag - Diabetes Dietary Assistant</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">🥗</div>
+        <div class="sidebar-title">
+          <h2>NutriDiag</h2>
+          <p>Dietary Assistant</p>
         </div>
       </div>
 
-      <div class="grid">
-        <div class="card">
-          <div class="cardTitle">Ask a dietary question</div>
-          <div class="row">
-            <div>
-              <label>Dropdown dish (recommended)</label>
-              <select id="foodDropdown"></select>
-            </div>
-            <div>
-              <label>Portion</label>
-              <select id="portion">
-                <option value="">(not set)</option>
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            </div>
-          </div>
-          <div class="mt12">
-            <label>Optional free-text food</label>
-            <input id="freeFood" placeholder="e.g., nasi lemak + teh tarik" />
-          </div>
-          <div class="mt12">
-            <label>Your question</label>
-            <textarea id="question" placeholder="e.g., Is nasi lemak okay for someone with Type 2 diabetes?"></textarea>
-          </div>
-          <div class="actions mt12">
-            <button id="btnAsk">Get recommendation</button>
-            <button id="btnHistory" class="secondary">Load history (latest 10)</button>
-            <div id="askMsg" class="muted"></div>
-          </div>
-          <div class="muted mt10">
-            Tip: run Ollama and pull a model (e.g. <span class="mono">ollama pull llama3.1:8b-instruct</span>) before asking queries.
+      <nav class="sidebar-nav">
+        <button class="nav-item active" onclick="switchPage('dashboard', this)">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('ask', this)">
+          <span class="nav-icon">❓</span>
+          <span>Ask Recommendation</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('history', this)">
+          <span class="nav-icon">📜</span>
+          <span>My History</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('profile', this)">
+          <span class="nav-icon">👤</span>
+          <span>My Profile</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-mini" onclick="switchPage('profile', document.querySelector('.nav-item:nth-child(4)'))">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="userEmail">user@example.com</strong>
+            <p>Logged in</p>
           </div>
         </div>
+      </div>
+    </aside>
 
-        <div class="card">
-          <div class="cardTitle">Answer</div>
-          <div id="answer" class="mono muted">No answer yet.</div>
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div>
+          <div class="topbar-title" id="pageTitle">Dashboard</div>
+          <div class="topbar-subtitle" id="pageSubtitle">Welcome back!</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+      </div>
 
-          <div class="sectionTitle">Retrieved references</div>
-          <div id="refs" class="muted"></div>
+      <!-- ===== DASHBOARD PAGE ===== -->
+      <div class="page active" id="page-dashboard">
+        <div style="padding: 32px;">
+          <div class="card">
+            <div class="card-title">📊 Your Statistics</div>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value" id="totalQueries">0</div>
+                <div class="stat-label">Total Queries</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="recentQueries">0</div>
+                <div class="stat-label">This Week</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="savedAdvice">0</div>
+                <div class="stat-label">Saved Advice</div>
+              </div>
+            </div>
+          </div>
 
-          <div class="sectionTitle">History</div>
-          <div id="history" class="muted">Not loaded.</div>
+          <div class="card">
+            <div class="card-title">📋 Recent Activity</div>
+            <div id="recentActivity"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">💡 Quick Tips</div>
+            <p style="color: #b0b0b0; margin-bottom: 12px;">
+              ✓ For people with diabetes, choose foods with low glycemic index (GI)<br />
+              ✓ Monitor portion sizes carefully<br />
+              ✓ Include fiber-rich foods in every meal<br />
+              ✓ Stay hydrated and limit sugary drinks
+            </p>
+            <button class="btn btn-primary" onclick="switchPage('ask', document.querySelector('.nav-item:nth-child(2)'))">
+              ❓ Ask a Question
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ASK RECOMMENDATION PAGE ===== -->
+      <div class="page" id="page-ask">
+        <div style="padding: 32px;">
+          <div class="grid">
+            <div>
+              <div class="card">
+                <div class="card-title">❓ Ask Your Dietary Question</div>
+
+                <div class="form-group">
+                  <label>Dropdown dish (recommended)</label>
+                  <select id="foodDropdown" style="width: 100%;">
+                    <option value="">(not selected)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Portion Size</label>
+                  <select id="portion" style="width: 100%;">
+                    <option value="">(not set)</option>
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Optional free-text food</label>
+                  <input
+                    id="freeFood"
+                    type="text"
+                    placeholder="e.g., nasi lemak + teh tarik"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Your Question</label>
+                  <textarea
+                    id="question"
+                    placeholder="e.g., Is nasi lemak okay for someone with Type 2 diabetes?"
+                  ></textarea>
+                </div>
+
+                <div class="actions">
+                  <button id="btnAsk" class="btn btn-primary" onclick="askQuestion()">
+                    🔍 Get Recommendation
+                  </button>
+                  <button id="btnHistory" class="btn btn-secondary" onclick="switchPage('history', document.querySelector('.nav-item:nth-child(3)'))">
+                    📜 View History
+                  </button>
+                </div>
+                <div id="askMsg" class="muted" style="margin-top: 12px;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card">
+                <div class="card-title">📝 AI Recommendation</div>
+                <div id="answer" style="color: #b0b0b0; min-height: 200px;">
+                  No answer yet. Ask a question to get started.
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-title">📚 Retrieved References</div>
+                <div id="refs" style="color: #b0b0b0;">
+                  References will appear here after you ask a question.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== HISTORY PAGE ===== -->
+      <div class="page" id="page-history">
+        <div style="padding: 32px;">
+          <div class="card">
+            <div class="card-title">📜 Query History</div>
+            <div id="history" style="color: #b0b0b0;">
+              Loading history...
+            </div>
+            <button class="btn btn-primary" onclick="loadHistory()" style="margin-top: 16px;">
+              🔄 Refresh History
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PROFILE PAGE ===== -->
+      <div class="page" id="page-profile">
+        <div style="padding: 32px;">
+          <div class="grid full">
+            <div class="card">
+              <div class="card-title">👤 My Profile</div>
+
+              <div style="margin-bottom: 24px;">
+                <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin-bottom: 16px;" id="profileAvatar">U</div>
+                <p style="color: #e0e0e0;">
+                  <strong id="profileEmail">user@example.com</strong>
+                </p>
+                <p style="color: #888; font-size: 12px;" id="profileJoined">
+                  Member since
+                </p>
+              </div>
+
+              <div class="section-title">Health Information</div>
+
+              <div class="form-group">
+                <label>Type 2 Diabetes</label>
+                <select id="profileDiabetes" style="width: 100%;">
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Age</label>
+                <input id="profileAge" type="number" min="1" max="120" placeholder="e.g., 45" />
+              </div>
+
+              <div class="form-group">
+                <label>Weight (kg)</label>
+                <input id="profileWeight" type="number" min="1" step="0.1" placeholder="e.g., 75" />
+              </div>
+
+              <div class="form-group">
+                <label>Activity Level</label>
+                <select id="profileActivity" style="width: 100%;">
+                  <option value="">Not set</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-primary" onclick="updateProfile()">
+                  ✓ Update Profile
+                </button>
+                <button class="btn btn-secondary" onclick="logout()">
+                  🚪 Logout
+                </button>
+              </div>
+              <div id="profileMsg" class="muted" style="margin-top: 12px;"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      const state = {
-        token: localStorage.getItem("token") || "",
+  <script>
+    const state = {
+      token: localStorage.getItem("token") || "",
+      user: JSON.parse(localStorage.getItem("user") || "{}"),
+    };
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function api(path, { method = "GET", body = null } = {}) {
+      const headers = { "Content-Type": "application/json" };
+      if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+      const res = await fetch(path, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = data?.detail ? String(data.detail) : `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function switchPage(pageName, navItem) {
+      // Hide all pages
+      document.querySelectorAll(".page").forEach((el) => {
+        el.classList.remove("active");
+      });
+
+      // Show selected page
+      const page = $(`page-${pageName}`);
+      if (page) {
+        page.classList.add("active");
+      }
+
+      // Update nav items
+      document.querySelectorAll(".nav-item").forEach((el) => {
+        el.classList.remove("active");
+      });
+      if (navItem) {
+        navItem.classList.add("active");
+      }
+
+      // Update topbar
+      const titles = {
+        dashboard: ["Dashboard", "Welcome back!"],
+        ask: ["Ask Recommendation", "Get dietary advice using AI"],
+        history: ["My History", "Your previous queries"],
+        profile: ["My Profile", "Update your health information"],
       };
 
-      function $(id) {
-        return document.getElementById(id);
+      $("pageTitle").textContent = titles[pageName]?.[0] || "Page";
+      $("pageSubtitle").textContent = titles[pageName]?.[1] || "";
+
+      // Load page-specific data
+      if (pageName === "dashboard") {
+        loadDashboard();
+      } else if (pageName === "history") {
+        loadHistory();
+      } else if (pageName === "profile") {
+        loadProfile();
       }
+    }
 
-      function escapeHtml(s) {
-        return String(s)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-
-      async function api(path, { method = "GET", body = null } = {}) {
-        const headers = { "Content-Type": "application/json" };
-        if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
-        const res = await fetch(path, {
-          method,
-          headers,
-          body: body ? JSON.stringify(body) : null,
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          const msg = data?.detail ? String(data.detail) : `HTTP ${res.status}`;
-          throw new Error(msg);
-        }
-        return data;
-      }
-
-      // Check if not logged in - redirect to login
-      if (!state.token) {
-        window.location.href = "/login";
-      }
-
-      async function loadFoods() {
-        const dd = $("foodDropdown");
-        dd.innerHTML = "";
-        try {
-          const foods = await api("/diet/foods");
-          const opt0 = document.createElement("option");
-          opt0.value = "";
-          opt0.textContent = "(not selected)";
-          dd.appendChild(opt0);
-          for (const f of foods) {
-            const opt = document.createElement("option");
-            opt.value = f;
-            opt.textContent = f;
-            dd.appendChild(opt);
-          }
-        } catch (e) {
-          console.error("Failed to load foods:", e);
-        }
-      }
-
-      // Load foods on page load
-      loadFoods();
-
-      $("btnLogout").addEventListener("click", () => {
+    function logout() {
+      if (confirm("Are you sure you want to logout?")) {
         state.token = "";
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         window.location.href = "/login";
-      });
+      }
+    }
 
-      $("btnAsk").addEventListener("click", async () => {
-        const msg = $("askMsg");
-        msg.textContent = "";
-        $("answer").textContent = "Working…";
-        $("refs").textContent = "";
-        try {
-          const payload = {
-            query_text: $("question").value.trim(),
-            selected_food: $("foodDropdown").value || null,
-            portion: $("portion").value || null,
-            free_text_food: $("freeFood").value.trim() || null,
-          };
-          const data = await api("/diet/query", { method: "POST", body: payload });
-          $("answer").textContent = data.formatted_answer;
-          const refs = data.references || [];
-          if (!refs.length) {
-            $("refs").textContent = "(no references retrieved)";
-          } else {
-            $("refs").innerHTML = refs
-              .map(
-                (r) => `
-                <div style="margin-bottom:10px;">
-                  <div><b>${escapeHtml(r.source)}</b></div>
-                  <div class="mono">${escapeHtml(r.snippet)}</div>
-                </div>`
-              )
-              .join("");
-          }
-          msg.textContent = "Done.";
-        } catch (e) {
-          $("answer").innerHTML = `<span class="danger">${escapeHtml(e.message)}</span>`;
-          msg.innerHTML = `<span class="danger">Error: ${escapeHtml(e.message)}</span>`;
+    async function loadFoods() {
+      const dd = $("foodDropdown");
+      dd.innerHTML = "";
+      try {
+        const foods = await api("/diet/foods");
+        const opt0 = document.createElement("option");
+        opt0.value = "";
+        opt0.textContent = "(not selected)";
+        dd.appendChild(opt0);
+        for (const f of foods) {
+          const opt = document.createElement("option");
+          opt.value = f;
+          opt.textContent = f;
+          dd.appendChild(opt);
         }
-      });
+      } catch (e) {
+        console.error("Failed to load foods:", e);
+      }
+    }
 
-      $("btnHistory").addEventListener("click", async () => {
-        const el = $("history");
-        el.textContent = "Loading…";
-        try {
-          const rows = await api("/diet/history");
-          if (!rows.length) {
-            el.textContent = "(no history yet)";
-            return;
-          }
-          el.innerHTML = rows
+    async function askQuestion() {
+      const msg = $("askMsg");
+      msg.textContent = "";
+      $("answer").innerHTML = '<span class="loading"></span> Working…';
+      $("refs").textContent = "";
+
+      try {
+        const payload = {
+          query_text: $("question").value.trim(),
+          selected_food: $("foodDropdown").value || null,
+          portion: $("portion").value || null,
+          free_text_food: $("freeFood").value.trim() || null,
+        };
+
+        if (!payload.query_text) {
+          throw new Error("Please enter a question");
+        }
+
+        const data = await api("/diet/query", { method: "POST", body: payload });
+        $("answer").innerHTML = `<div class="answer-section">${escapeHtml(data.formatted_answer)}</div>`;
+
+        const refs = data.references || [];
+        if (!refs.length) {
+          $("refs").innerHTML = '<div class="alert alert-warning">No references retrieved</div>';
+        } else {
+          $("refs").innerHTML = refs
             .map(
               (r) => `
-              <div style="border:1px solid #223155;border-radius:10px;padding:10px;margin-bottom:10px;">
-                <div class="muted">${escapeHtml(r.created_at)}</div>
-                <div><b>Q:</b> ${escapeHtml(r.query_text)}</div>
-                <div><b>Food:</b> ${escapeHtml(r.selected_food || "-")}</div>
-                <div class="mono" style="margin-top:5px;">${escapeHtml(r.response_text)}</div>
+              <div class="reference-card">
+                <div class="reference-source">📄 ${escapeHtml(r.source)}</div>
+                <div class="reference-snippet">${escapeHtml(r.snippet)}</div>
               </div>`
             )
             .join("");
-        } catch (e) {
-          el.innerHTML = `<span class="danger">${escapeHtml(e.message)}</span>`;
         }
-      });
-    </script>
-  </body>
+
+        msg.innerHTML = '<div class="alert alert-success">✓ Done</div>';
+      } catch (e) {
+        $("answer").innerHTML = `<div class="alert alert-error">❌ ${escapeHtml(e.message)}</div>`;
+        msg.innerHTML = `<div class="alert alert-error">Error: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    async function loadHistory() {
+      const el = $("history");
+      el.textContent = "Loading…";
+      try {
+        const rows = await api("/diet/history");
+        if (!rows.length) {
+          el.textContent = "(no history yet)";
+          return;
+        }
+        el.innerHTML = rows
+          .map(
+            (r) => `
+            <div class="history-item">
+              <div class="history-time">⏰ ${escapeHtml(r.created_at || "")}</div>
+              <div class="history-question"><strong>Q:</strong> ${escapeHtml(r.query_text)}</div>
+              <div class="history-food"><strong>Food:</strong> ${escapeHtml(r.selected_food || "-")}</div>
+              <div class="history-response"><strong>A:</strong> ${escapeHtml(r.response_text.substring(0, 150))}...</div>
+            </div>`
+          )
+          .join("");
+      } catch (e) {
+        el.innerHTML = `<div class="alert alert-error">Error: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    async function loadProfile() {
+      try {
+        const user = await api("/auth/profile");
+        state.user = user;
+        localStorage.setItem("user", JSON.stringify(user));
+
+        $("profileEmail").textContent = user.email || "";
+        $("profileDiabetes").value = user.type2_diabetes ? "true" : "false";
+        $("profileAge").value = user.age || "";
+        $("profileWeight").value = user.weight_kg || "";
+        $("profileActivity").value = user.activity_level || "";
+
+        const joined = new Date(user.created_at);
+        $("profileJoined").textContent = `Member since ${joined.toLocaleDateString()}`;
+      } catch (e) {
+        console.error("Failed to load profile:", e);
+      }
+    }
+
+    async function updateProfile() {
+      const msg = $("profileMsg");
+      msg.textContent = "";
+      try {
+        const payload = {
+          type2_diabetes: $("profileDiabetes").value === "true",
+          age: parseInt($("profileAge").value) || null,
+          weight_kg: parseFloat($("profileWeight").value) || null,
+          activity_level: $("profileActivity").value || null,
+        };
+
+        await api("/auth/profile", { method: "PUT", body: payload });
+        msg.innerHTML = '<div class="alert alert-success">✓ Profile updated</div>';
+
+        // Reload profile
+        setTimeout(() => loadProfile(), 500);
+      } catch (e) {
+        msg.innerHTML = `<div class="alert alert-error">❌ ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    async function loadDashboard() {
+      try {
+        const history = await api("/diet/history");
+        $("totalQueries").textContent = history.length;
+        $("recentQueries").textContent = history.slice(0, 7).length;
+
+        const activityHtml = history.slice(0, 3).map((r) => `
+          <div class="history-item">
+            <div class="history-time">⏰ ${escapeHtml(r.created_at || "")}</div>
+            <div class="history-question">${escapeHtml(r.query_text)}</div>
+          </div>
+        `).join("");
+
+        $("recentActivity").innerHTML = activityHtml || '<p class="muted">No recent activity</p>';
+      } catch (e) {
+        console.error("Failed to load dashboard:", e);
+      }
+    }
+
+    // Check if logged in
+    if (!state.token) {
+      window.location.href = "/login";
+    }
+
+    // Initialize
+    function init() {
+      loadFoods();
+      loadDashboard();
+
+      // Set user info in sidebar
+      $("userAvatar").textContent = (state.user.email || "U")[0].toUpperCase();
+      $("userEmail").textContent = state.user.email || "user@example.com";
+    }
+
+    init();
+  </script>
+</body>
 </html>
 
