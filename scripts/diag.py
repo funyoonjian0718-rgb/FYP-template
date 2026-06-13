@@ -86,7 +86,7 @@ def run_ingest() -> None:
 def check_chroma() -> None:
     import os
 
-    path = settings.chroma_dir
+    path = settings.vectorstore_dir
     print(f"Checking Chroma dir: {path}")
     if not os.path.exists(path):
         print("Chroma directory does not exist.")

@@ -16,6 +16,49 @@ function escapeHtml(s) {
     .replaceAll("'", '&#039;');
 }
 
+function formatAnswer(text) {
+  let safe = escapeHtml(text || '');
+
+  const headings = [
+    'Summary Recommendation',
+    'Why (Based on Retrieved Context)',
+    'Better Alternatives (From Retrieved Sources)',
+    'Portion Guidance (From Retrieved Context)',
+    'Budget Guidance',
+    'Sources Used',
+    'Health Disclaimer',
+    'Validation Notes',
+    'References (from RAG)'
+  ];
+
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  for (const heading of headings) {
+    const regex = new RegExp(`\\s*${escapeRegex(heading)}:`, 'g');
+    safe = safe.replace(regex, `\n\n<h3 class="answer-heading">${heading}</h3>`);
+  }
+
+  safe = safe
+    .replace(/\s+•\s+/g, '\n<div class="answer-bullet">• ')
+    .replace(/\s+-\s+/g, '\n<div class="answer-bullet">- ')
+    .replace(/\s+(\d+)\.\s+/g, '\n<div class="answer-bullet">$1. ');
+
+  safe = safe
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('<div class="answer-bullet">') && !trimmed.endsWith('</div>')) {
+        return `${trimmed}</div>`;
+      }
+      return line;
+    })
+    .join('\n');
+
+  return `<div class="answer-section answer-text">${safe}</div>`;
+}
+
 async function api(path, { method = 'GET', body = null } = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (state.token) {
@@ -188,6 +231,7 @@ async function askQuestion() {
   const msg = $('askMsg');
   const answerEl = $('answer');
   const refsEl = $('refs');
+
   if (msg) msg.textContent = '';
   if (answerEl) answerEl.innerHTML = '<span class="loading"></span> Working…';
   if (refsEl) refsEl.textContent = '';
@@ -199,13 +243,20 @@ async function askQuestion() {
       portion: $('portion')?.value || null,
       free_text_food: $('freeFood')?.value.trim() || null,
     };
-    if (!payload.query_text) throw new Error('Please enter a question.');
+
+    if (!payload.query_text) {
+      throw new Error('Please enter a question.');
+    }
 
     const data = await api('/diet/query', { method: 'POST', body: payload });
-    if (answerEl) answerEl.innerHTML = `<div class="answer-section">${escapeHtml(data.formatted_answer || '')}</div>`;
+
+    if (answerEl) {
+      answerEl.innerHTML = formatAnswer(data.formatted_answer || '');
+    }
 
     if (refsEl) {
       const refs = data.references || [];
+
       if (!refs.length) {
         refsEl.innerHTML = '<div class="alert alert-warning">No references retrieved</div>';
       } else {
@@ -221,10 +272,17 @@ async function askQuestion() {
       }
     }
 
-    if (msg) msg.innerHTML = '<div class="alert alert-success">✓ Done</div>';
+    if (msg) {
+      msg.innerHTML = '<div class="alert alert-success">✓ Done</div>';
+    }
   } catch (error) {
-    if (answerEl) answerEl.innerHTML = `<div class="alert alert-error">❌ ${escapeHtml(error.message)}</div>`;
-    if (msg) msg.innerHTML = `<div class="alert alert-error">Error: ${escapeHtml(error.message)}</div>`;
+    if (answerEl) {
+      answerEl.innerHTML = `<div class="alert alert-error">❌ ${escapeHtml(error.message)}</div>`;
+    }
+
+    if (msg) {
+      msg.innerHTML = `<div class="alert alert-error">Error: ${escapeHtml(error.message)}</div>`;
+    }
   }
 }
 
@@ -294,4 +352,4 @@ window.initHistory = initHistory;
 window.initProfile = initProfile;
 window.setToken = setToken;
 window.setUser = setUser;
-
+window.formatAnswer = formatAnswer;
