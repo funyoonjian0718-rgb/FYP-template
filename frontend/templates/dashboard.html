@@ -58,18 +58,9 @@
 
   <script src="/static/js/app.js"></script>
   <script>
-    async function initDashboard(){
-      if(!state.token) window.location.href='/login';
-      document.getElementById('userAvatar').textContent = (state.user.email||'U')[0].toUpperCase();
-      document.getElementById('userEmail').textContent = state.user.email||'user@example.com';
-      try{
-        const history = await api('/diet/history');
-        document.getElementById('totalQueries').textContent = history.length;
-        document.getElementById('recentQueries').textContent = history.slice(0,7).length;
-        document.getElementById('recentActivity').innerHTML = history.slice(0,3).map(r=>`<div class="history-item"><div class="history-time">⏰ ${escapeHtml(r.created_at||'')}</div><div class="history-question">${escapeHtml(r.query_text)}</div></div>`).join('') || '<p class="muted">No recent activity</p>';
-      }catch(e){console.error(e);}
-    }
-    initDashboard();
+    document.addEventListener('DOMContentLoaded', () => {
+      initDashboard();
+    });
   </script>
 </body>
 </html>

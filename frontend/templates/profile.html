@@ -37,13 +37,9 @@
 
   <script src="/static/js/app.js"></script>
   <script>
-    async function initProfile(){
-      if(!state.token) window.location.href='/login';
-      document.getElementById('userAvatar').textContent = (state.user.email||'U')[0].toUpperCase();
-      document.getElementById('userEmail').textContent = state.user.email||'user@example.com';
-      await loadProfile();
-    }
-    initProfile();
+    document.addEventListener('DOMContentLoaded', () => {
+      initProfile();
+    });
   </script>
 </body>
 </html>

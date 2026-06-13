@@ -4,9 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>NutriDiag</title>
-    <meta http-equiv="refresh" content="0; url=/dashboard" />
+    <script>
+      const token = localStorage.getItem('token');
+      if (token) {
+        window.location.replace('/dashboard');
+      } else {
+        window.location.replace('/login');
+      }
+    </script>
   </head>
   <body>
-    Redirecting to dashboard… If you are not redirected, <a href="/dashboard">click here</a>.
+    Redirecting… If you are not redirected, <a href="/login">click here</a>.
   </body>
 </html>

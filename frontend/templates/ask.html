@@ -47,30 +47,9 @@
 
   <script src="/static/js/app.js"></script>
   <script>
-    async function initAsk(){
-      if(!state.token) window.location.href='/login';
-      document.getElementById('userAvatar').textContent = (state.user.email||'U')[0].toUpperCase();
-      document.getElementById('userEmail').textContent = state.user.email||'user@example.com';
-      await loadFoods();
-    }
-
-    async function askQuestion(){
-      const msg = document.getElementById('askMsg'); msg.textContent='';
-      document.getElementById('answer').innerHTML = '<span class="loading"></span> Working…';
-      document.getElementById('refs').textContent = '';
-      try{
-        const payload = { query_text: document.getElementById('question').value.trim(), selected_food: document.getElementById('foodDropdown').value||null, portion: document.getElementById('portion').value||null, free_text_food: document.getElementById('freeFood').value.trim()||null };
-        if(!payload.query_text) throw new Error('Please enter a question');
-        const data = await api('/diet/query',{method:'POST', body: payload});
-        document.getElementById('answer').innerHTML = `<div class="answer-section">${escapeHtml(data.formatted_answer)}</div>`;
-        const refs = data.references||[];
-        if(!refs.length) document.getElementById('refs').innerHTML = '<div class="alert alert-warning">No references retrieved</div>';
-        else document.getElementById('refs').innerHTML = refs.map(r=>`<div class="reference-card"><div class="reference-source">📄 ${escapeHtml(r.source)}</div><div class="reference-snippet">${escapeHtml(r.snippet)}</div></div>`).join('');
-        msg.innerHTML = '<div class="alert alert-success">✓ Done</div>';
-      }catch(e){ document.getElementById('answer').innerHTML = `<div class="alert alert-error">❌ ${escapeHtml(e.message)}</div>`; msg.innerHTML = `<div class="alert alert-error">Error: ${escapeHtml(e.message)}</div>`; }
-    }
-
-    initAsk();
+    document.addEventListener('DOMContentLoaded', () => {
+      initAsk();
+    });
   </script>
 </body>
 </html>

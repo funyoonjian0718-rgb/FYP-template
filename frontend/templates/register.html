@@ -7,17 +7,15 @@
     <link rel="stylesheet" href="/static/css/style.css" />
   </head>
   <body>
-    <div class="wrap">
-      <div class="topbar">
-        <div>
-          <div class="title">FYP — Context-Aware Dietary Advice (RAG)</div>
+    <div class="auth-page">
+      <div class="auth-container">
+        <div class="auth-heading">
+          <div class="title">FYP — Context-Aware Dietary Advice</div>
           <div class="muted">Create an account to get personalized dietary recommendations</div>
         </div>
-      </div>
 
-      <div class="grid">
-        <div class="card" style="max-width: 500px; margin: 0 auto;">
-          <div class="cardTitle">Register</div>
+        <div class="auth-card card">
+          <div class="card-title">Register</div>
           <div class="row">
             <div>
               <label>Email *</label>
@@ -139,7 +137,7 @@
           localStorage.setItem("token", state.token);
           msg.textContent = "Registered successfully! Redirecting...";
           setTimeout(() => {
-            window.location.href = "/";
+            window.location.href = "/dashboard";
           }, 500);
         } catch (e) {
           msg.innerHTML = `<span class="danger">${escapeHtml(e.message)}</span>`;
