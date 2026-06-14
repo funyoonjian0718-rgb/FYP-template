@@ -1,6 +1,97 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.rag.types import RetrievedSnippet
+
+
+def _safe_value(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    text = str(value).strip()
+
+    if not text or text.lower() in {"nan", "none", "null"}:
+        return None
+
+    return text
+
+
+def _format_price(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    try:
+        return f"RM {float(value):.2f}"
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def _question_flags(question: str) -> dict[str, bool]:
+    q = question.lower()
+
+    meal_plan = any(
+        word in q
+        for word in [
+            "meal plan",
+            "meal prep",
+            "eating strategy",
+            "breakfast",
+            "lunch",
+            "dinner",
+            "snack",
+            "7-day",
+            "5-day",
+            "daily",
+        ]
+    )
+
+    budget = any(
+        word in q
+        for word in [
+            "budget",
+            "cost",
+            "cheap",
+            "affordable",
+            "rm",
+            "under rm",
+        ]
+    )
+
+    compare = any(
+        word in q
+        for word in [
+            "compare",
+            "rank",
+            "healthier",
+            "which is healthier",
+        ]
+    )
+
+    medical = any(
+        word in q
+        for word in [
+            "diabetes",
+            "diabetic",
+            "hypertension",
+            "blood pressure",
+            "ckd",
+            "kidney",
+            "gout",
+            "allergy",
+            "lactose",
+            "iron deficiency",
+            "anemia",
+            "anaemia",
+        ]
+    )
+
+    return {
+        "meal_plan": meal_plan,
+        "budget": budget,
+        "compare": compare,
+        "medical": medical,
+    }
 
 
 def build_prompt(
@@ -12,61 +103,133 @@ def build_prompt(
     retrieved: list[RetrievedSnippet],
     food_metadata: list[dict] | None = None,
 ) -> str:
-    context_lines = []
+    flags = _question_flags(question)
+
+    context_lines: list[str] = []
+
     for i, r in enumerate(retrieved, start=1):
-        context_lines.append(f"[{i}] Source: {r.source}\nSnippet: {r.snippet}")
+        context_lines.append(
+            f"[{i}] Source: {r.source}\nSnippet: {r.snippet}"
+        )
 
-    context_block = "\n\n".join(context_lines) if context_lines else "(no retrieved context)"
+    context_block = (
+        "\n\n".join(context_lines)
+        if context_lines
+        else "(no retrieved context)"
+    )
 
-    pricing_lines = []
+    pricing_lines: list[str] = []
+
     if food_metadata:
         for item in food_metadata:
-            name = item.get("name")
-            serving = item.get("serving_size", "one serving")
-            price = item.get("price_myr")
-            calories = item.get("calories")
-            carbs = item.get("carbohydrates_g")
-            protein = item.get("protein_g")
-            fat = item.get("fat_g")
-            fibre = item.get("fibre_g")
-            sugar = item.get("sugar_g")
-            sodium = item.get("sodium_mg")
-            gi = item.get("glycemic_index")
-            diabetes = item.get("diabetes_suitable")
+            name = _safe_value(item.get("name")) or "Unknown food"
+            serving = _safe_value(item.get("serving_size")) or "one serving"
+
             line = f"- {name}: {serving}"
-            if calories is not None:
-                line += f", {calories} kcal"
-            if carbs is not None:
-                line += f", {carbs}g carbs"
-            if protein is not None:
-                line += f", {protein}g protein"
-            if fat is not None:
-                line += f", {fat}g fat"
-            if fibre is not None:
-                line += f", {fibre}g fibre"
-            if sugar is not None:
-                line += f", {sugar}g sugar"
-            if sodium is not None:
-                line += f", {sodium}mg sodium"
+
+            field_map = [
+                ("calories", "kcal"),
+                ("carbohydrates_g", "g carbs"),
+                ("protein_g", "g protein"),
+                ("fat_g", "g fat"),
+                ("fibre_g", "g fibre"),
+                ("sugar_g", "g sugar"),
+                ("sodium_mg", "mg sodium"),
+                ("potassium_mg", "mg potassium"),
+                ("phosphorus_mg", "mg phosphorus"),
+                ("iron_mg", "mg iron"),
+            ]
+
+            for key, label in field_map:
+                value = _safe_value(item.get(key))
+                if value is not None:
+                    line += f", {value}{label if value[-1].isdigit() else ' ' + label}"
+
+            gi = _safe_value(item.get("glycemic_index"))
             if gi:
                 line += f", GI: {gi}"
-            if diabetes is not None:
+
+            diabetes = _safe_value(item.get("diabetes_suitable"))
+            if diabetes:
                 line += f", diabetes_suitable: {diabetes}"
-            if price is not None:
-                line += f", price: RM {price:.2f}"
+
+            price = _format_price(item.get("price_myr"))
+            if price:
+                line += f", price: {price}"
+
             pricing_lines.append(line)
 
-    pricing_block = "\n".join(pricing_lines) if pricing_lines else "(no food nutrition or pricing metadata available)"
+    pricing_block = (
+        "\n".join(pricing_lines)
+        if pricing_lines
+        else "(no food nutrition or pricing metadata available)"
+    )
+
+    task_instruction = ""
+
+    if flags["meal_plan"]:
+        task_instruction += """
+The user is asking for a meal plan, eating strategy, or meal prep.
+You MUST include these exact sections:
+- Breakfast
+- Lunch
+- Dinner
+- Snacks/Drinks
+- Budget Guidance
+
+If the constraints are impossible, do NOT invent a fake perfect plan.
+Instead, clearly say the plan is not fully feasible, explain which constraints conflict, and give the safest closest alternative.
+"""
+
+    if flags["budget"]:
+        task_instruction += """
+The user has a budget or cost constraint.
+You MUST include Budget Guidance.
+If exact prices are available, estimate cost using only those prices.
+If exact prices are not available, say exact cost cannot be calculated from the knowledge base, then give low-cost strategy from retrieved context.
+Do not skip the budget section.
+"""
+
+    if flags["compare"]:
+        task_instruction += """
+The user is asking for comparison or ranking.
+You MUST include a simple comparison table or bullet comparison.
+You MUST include a final ranking with reasons.
+"""
+
+    if flags["medical"]:
+        task_instruction += """
+The user has medical conditions or dietary risks.
+Be conservative.
+Do not diagnose.
+Do not claim treatment or cure.
+For CKD, hypertension, diabetes, gout, allergy, lactose intolerance, or iron deficiency, explain what nutrients or food types need caution based on retrieved context.
+Always include a medical disclaimer.
+"""
 
     return f"""You are a dietary advice assistant for Malaysia, powered by Retrieval-Augmented Generation (RAG).
 
-**CRITICAL INSTRUCTIONS:**
-1. You MUST ONLY use information from the "Food Nutrition Data" and "Retrieved Context" sections below.
-2. DO NOT use any prior knowledge about foods or nutrition not provided in these sections.
-3. If both Food Nutrition Data and Retrieved Context do not contain enough information to answer the question, respond: "I don't have enough information in my knowledge base to answer this. Please consult a dietitian."
-4. ALWAYS cite which source(s) you used from the retrieved context.
-5. Be cautious about medical claims and avoid medical diagnosis. If uncertain, defer to professional advice.
-6. When multiple sources say different things, acknowledge the difference.
+IMPORTANT:
+Your job is not only to repeat retrieved snippets.
+Your job is to use the retrieved knowledge base to produce a useful, structured answer.
+
+CRITICAL RULES:
+1. Use the "Food Nutrition Data" and "Retrieved Context" as the factual source for food, nutrition, price, disease-specific advice, and alternatives.
+2. Do not invent exact nutrition numbers, prices, sodium, potassium, phosphorus, iron, calories, or protein values that are not provided.
+3. If an exact number is missing, say "not available in the knowledge base" instead of inventing it.
+4. Do NOT immediately refuse just because some exact values are missing.
+5. Only say "I don't have enough information in my knowledge base" if there is no relevant retrieved context at all.
+6. Always cite retrieved sources using the source numbers like [1], [2], [3].
+7. Do not recommend foods that violate explicit user restrictions.
+   Example: if the user says no soy, do not recommend tofu, tempeh, soy milk, or soy-based foods.
+8. If constraints conflict, clearly say the combination is difficult or not realistic.
+9. If the user asks for breakfast/lunch/dinner, you MUST include breakfast/lunch/dinner headings.
+10. If the user asks for budget, cost, affordable, RM, or under RM, you MUST include Budget Guidance.
+11. If the user asks for a multi-day plan, provide a practical multi-day structure. If exact daily nutrition cannot be calculated, say so clearly.
+12. Keep the answer practical for Malaysian users, especially students, mamak stalls, convenience stores, and local foods when those appear in retrieved context.
+
+Task-Specific Instructions:
+{task_instruction}
 
 User Context:
 - Type 2 Diabetes: {user_context.get("type2_diabetes")}
@@ -82,56 +245,58 @@ Food Context:
 Food Nutrition Data:
 {pricing_block}
 
-**RETRIEVED CONTEXT (USE ONLY THIS TO ANSWER):**
+RETRIEVED CONTEXT:
 {context_block}
 
 User Question:
 {question}
 
-**RESPONSE FORMAT:**
-Use this exact structure. Do not write everything in one paragraph. Put a blank line between each section.
+RESPONSE FORMAT:
+Use clear headings. Do not write everything in one paragraph.
+
+Feasibility and Safety Check:
+- State whether the request is suitable, moderate, risky, or not fully feasible.
+- Mention any conflicting constraints.
 
 Summary Recommendation:
-- Give 1 short recommendation.
-- Mention whether the meal/plan is suitable, moderate, or should be limited.
+- Give the main recommendation in 2-4 sentences.
 
-Why (Based on Retrieved Context):
-- Bullet point 1
-- Bullet point 2
-- Bullet point 3
+Meal Plan / Eating Strategy:
+- Breakfast:
+- Lunch:
+- Dinner:
+- Snacks/Drinks:
 
-Better Alternatives (From Retrieved Sources):
+Budget Guidance:
+- If prices are available, give an estimated cost.
+- If exact prices are not available, say exact cost is not available in the knowledge base and give affordable strategy from retrieved sources.
+- Do not skip this section if the user mentioned budget, RM, cheap, affordable, student, mamak, or convenience store.
+
+Nutrition / Health Reasoning:
+- Explain calories, protein, carbohydrate, sodium, sugar, fat, potassium, phosphorus, iron, GI, or other relevant concerns only when supported by retrieved context.
+- If a required nutrient value is missing, say it is not available in the knowledge base.
+
+Foods to Avoid or Modify:
+- List foods that should be avoided, limited, or modified based on the user's restrictions and retrieved context.
+- Explain why.
+
+Better Alternatives:
 1. Food name - reason.
 2. Food name - reason.
 3. Food name - reason.
 
-Portion Guidance (From Retrieved Context):
-- Breakfast:
-- Lunch:
-- Dinner:
-- Snacks:
-
-Budget Guidance:
-- Give simple low-cost advice only if price or budget information exists in the retrieved context.
+Comparison / Ranking:
+- Include this section if the user asks to compare or rank foods.
+- If not relevant, write "Not applicable."
 
 Sources Used:
-- Source 1
-- Source 2
+- Cite the retrieved source numbers used, for example [1], [2], [3].
+
+References from RAG:
+- <Source name>: "<short supporting quote from retrieved context>"
+- <Source name>: "<short supporting quote from retrieved context>"
 
 Health Disclaimer:
 - This is educational guidance only and not a medical diagnosis.
-
----
-If constraints conflict, clearly state that the combination is difficult and offer the safest possible alternative.
-If pricing data is available, use only the provided values and do not invent a different cost amount.
-Do NOT recommend any foods that violate explicit user restrictions (for example, no soy if the user says "no soy").
-Do NOT overstate the nutritional benefit of any single food without supporting evidence from the references.
-
-References (from RAG):
-- <Source name>: "<short quote/snippet>"
-- <Source name>: "<short quote/snippet>"
-
-Health Disclaimer:
-<1-2 sentences stating this is not medical diagnosis and consult professionals>
+- For diabetes, CKD, hypertension, gout, allergy, pregnancy, or other medical conditions, the user should consult a doctor or registered dietitian.
 """
-
