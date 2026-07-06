@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
+#as the previous stuff said extract the Users when login then retrieve based on the variable
 class User(Base):
     __tablename__ = "users"
 

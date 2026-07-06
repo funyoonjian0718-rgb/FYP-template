@@ -90,6 +90,8 @@
           const data = await api("/auth/login", { method: "POST", body: payload });
           state.token = data.access_token;
           localStorage.setItem("token", state.token);
+          const user = await api("/auth/profile");
+          localStorage.setItem("user", JSON.stringify(user));
           msg.textContent = "Logged in! Redirecting...";
           setTimeout(() => {
             window.location.href = "/dashboard";

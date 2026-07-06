@@ -1,96 +1,53 @@
-# Python Virtual Environments
-.venv/
-venv/
-env/
-ENV/
-.env.local
-.env.*.local
-
-# Python cache and compiled files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# Environment variables (SENSITIVE - never commit!)
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables
 .env
-.env.local
-.env.*.local
-*.env
 
-# IDE and Editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-*.sublime-workspace
-*.sublime-project
-
-# Database files (local dev only - rebuild on user's machine)
+# Database files
 app.db
 *.sqlite3
-*.db
+*.sqlite3-journal
+*.sqlite3-shm
+*.sqlite3-wal
 
-# Vector store (will be rebuilt by running ingest.py)
-chroma/
+# Generated vector stores / embeddings
+vectorstore/
 
-# Frontend build artifacts (if any)
-node_modules/
-dist/
-build/
-*.bundle.js
+# IDE/editor files
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# OS specific files
+# OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
+Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
+# Logs and runtime files
 *.log
-.pytest_cache/
-.coverage
-htmlcov/
+*.tmp
+*.cache
 
-# IDE specific
-*.iml
-.gradle
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# Sensitive local config
+credentials.json
+*.key
+*.pem
 
-# Backup files
-*.bak
-*.backup
-*~
+# Ignore any local secrets or host configs
+*.env.*
 
-# Misc
-.env.example  # Uncomment if you want to version control example .env
+# Ignore data exports if generated locally
+*.csv
+*.xlsx
+*.db

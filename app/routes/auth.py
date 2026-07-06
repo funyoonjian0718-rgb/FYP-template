@@ -13,6 +13,7 @@ from app.auth.schemas import (
     ResetPasswordRequest,
     TokenResponse,
     UserProfileResponse,
+    UserProfileUpdateRequest,
 )
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.models import PasswordResetToken, User
@@ -62,6 +63,39 @@ def me(user: User = Depends(get_current_user)) -> UserProfileResponse:
         age=user.age,
         weight_kg=user.weight_kg,
         activity_level=user.activity_level,
+        created_at=user.created_at,
+    )
+
+
+@router.get("/profile", response_model=UserProfileResponse)
+def profile(user: User = Depends(get_current_user)) -> UserProfileResponse:
+    return me(user)
+
+
+@router.put("/profile", response_model=UserProfileResponse)
+def update_profile(
+    payload: UserProfileUpdateRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> UserProfileResponse:
+    if payload.type2_diabetes is not None:
+        user.type2_diabetes = payload.type2_diabetes
+    if payload.age is not None:
+        user.age = payload.age
+    if payload.weight_kg is not None:
+        user.weight_kg = payload.weight_kg
+    if payload.activity_level is not None:
+        user.activity_level = payload.activity_level
+    db.commit()
+    db.refresh(user)
+    return UserProfileResponse(
+        id=user.id,
+        email=user.email,
+        type2_diabetes=user.type2_diabetes,
+        age=user.age,
+        weight_kg=user.weight_kg,
+        activity_level=user.activity_level,
+        created_at=user.created_at,
     )
 
 

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3"
 
-    rag_top_k: int = 4
+    rag_top_k: int = 25
 
 
 settings = Settings()

@@ -69,6 +69,7 @@ def _load_markdown_files(base_dir: str) -> list[tuple[str, dict]]:
     ignored_names = {
         "RAG_fix_retrieval_prompt_and_ingestion_guide.md",
         "RAG_dataset_import_guide.md",
+        "foods.json", #ignore because have duplicates inside CSV
     }
 
     for pattern in ["*.md", "*.txt"]:

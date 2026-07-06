@@ -17,7 +17,7 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, password_hash: str) -> bool:
     return pwd_context.verify(password, password_hash)
 
-
+#give the login user a JSON web token 
 def create_access_token(subject: str, extra: dict[str, Any] | None = None) -> str:
     now = datetime.now(timezone.utc)
     expire = now + timedelta(minutes=settings.access_token_minutes)

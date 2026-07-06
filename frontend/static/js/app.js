@@ -97,6 +97,22 @@ function setUser(user) {
   localStorage.setItem('user', JSON.stringify(state.user));
 }
 
+async function loadCurrentUser() {
+  if (!ensureAuth()) return null;
+  if (state.user?.email) {
+    return state.user;
+  }
+
+  try {
+    const user = await api('/auth/profile');
+    setUser(user);
+    return user;
+  } catch (error) {
+    console.error('Failed to load current user:', error);
+    return null;
+  }
+}
+
 function logout() {
   if (!confirm('Are you sure you want to logout?')) {
     return;
@@ -167,10 +183,30 @@ async function loadHistory() {
           <div class="history-time">⏰ ${escapeHtml(r.created_at || '')}</div>
           <div class="history-question">${escapeHtml(r.query_text || '')}</div>
           <div class="history-food"><strong>Food:</strong> ${escapeHtml(r.selected_food || '-')}</div>
-          <div class="history-response">${escapeHtml((r.response_text || '').substring(0, 150))}...</div>
+          <div class="history-response" style="display: none;">${escapeHtml(r.response_text || '')}</div>
         </div>`
       )
       .join('');
+
+    el.querySelectorAll('.history-response').forEach((response) => {
+      response.style.display = 'none';
+      response.style.overflow = 'visible';
+      response.style.maxHeight = 'none';
+    });
+
+    if (!el.dataset.historyClickBound) {
+      el.addEventListener('click', (event) => {
+        const item = event.target.closest('.history-item');
+        if (!item || !el.contains(item)) return;
+        const response = item.querySelector('.history-response');
+        const expanded = item.classList.toggle('expanded');
+        if (response) {
+          response.style.display = expanded ? 'block' : 'none';
+        }
+      });
+      el.dataset.historyClickBound = 'true';
+    }
+
     return rows;
   } catch (error) {
     el.innerHTML = `<div class="alert alert-error">Error: ${escapeHtml(error.message)}</div>`;
@@ -288,6 +324,7 @@ async function askQuestion() {
 
 async function initDashboard() {
   if (!ensureAuth()) return;
+  await loadCurrentUser();
   refreshUserUI();
 
   try {
@@ -321,18 +358,21 @@ async function initDashboard() {
 
 async function initAsk() {
   if (!ensureAuth()) return;
+  await loadCurrentUser();
   refreshUserUI();
   await loadFoods();
 }
 
 async function initHistory() {
   if (!ensureAuth()) return;
+  await loadCurrentUser();
   refreshUserUI();
   await loadHistory();
 }
 
 async function initProfile() {
   if (!ensureAuth()) return;
+  await loadCurrentUser();
   refreshUserUI();
   await loadProfile();
 }
