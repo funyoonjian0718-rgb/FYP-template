@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Results - NutriDiag</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><div class="sidebar-logo">🥗</div><div class="sidebar-title"><h2>NutriDiag</h2><p>Dietary Assistant</p></div></div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" href="/dashboard">📊 Dashboard</a>
+        <a class="nav-item" href="/ask">❓ Ask Recommendation</a>
+        <a class="nav-item" href="/history">📜 My History</a>
+        <a class="nav-item" href="/profile">👤 My Profile</a>
+      </nav>
+      <div class="sidebar-footer"><div class="user-profile-mini"><div class="user-avatar" id="userAvatar">U</div><div class="user-info"><strong id="userEmail">user@example.com</strong><p>Logged in</p></div></div></div>
+    </aside>
+
+    <div class="main-content">
+      <div class="topbar"><div><div class="topbar-title">Recommendation Result</div><div class="topbar-subtitle">A cleaner layout for your AI answer</div></div><div class="topbar-actions"><button class="btn-logout" onclick="logout()">Logout</button></div></div>
+
+      <div style="padding:32px;" id="resultBody">
+        <div class="card">
+          <div class="card-title">📝 Your request</div>
+          <div class="result-meta-grid">
+            <div><strong>Question</strong><p id="resultQueryText"></p></div>
+            <div><strong>Selected food</strong><p id="resultSelectedFood"></p></div>
+            <div><strong>Portion</strong><p id="resultPortion"></p></div>
+            <div><strong>Extra food note</strong><p id="resultFreeFood"></p></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📌 AI Recommendation</div>
+          <div id="answer" class="result-answer"></div>
+        </div>
+
+        <div class="card references-section">
+          <div class="card-title">📚 References</div>
+          <div id="refs"></div>
+        </div>
+
+        <div class="actions" style="margin-top:16px; gap:12px; display:flex; flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="window.location.href='/ask'">Ask another question</button>
+          <button class="btn btn-primary" onclick="window.location.href='/history'">View history</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadResultPage();
+      refreshUserUI();
+    });
+  </script>
+</body>
+</html>

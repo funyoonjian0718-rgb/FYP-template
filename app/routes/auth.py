@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import secrets
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -15,6 +15,7 @@ from app.auth.schemas import (
     UserProfileResponse,
     UserProfileUpdateRequest,
 )
+from app.core.email_utils import send_password_reset_email
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.models import PasswordResetToken, User
 from app.db.session import get_db
@@ -104,15 +105,37 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     user = db.scalar(select(User).where(User.email == payload.email))
     if not user:
         # avoid account enumeration
-        return {"ok": True}
+        return {"ok": True, "message": "If the account exists, a reset link is ready."}
+
+    existing_tokens = db.scalars(
+        select(PasswordResetToken).where(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.used.is_(False),
+        )
+    ).all()
+    for token_row in existing_tokens:
+        token_row.used = True
 
     token = secrets.token_urlsafe(32)
     prt = PasswordResetToken(user_id=user.id, token=token, used=False, created_at=datetime.utcnow())
     db.add(prt)
     db.commit()
 
-    # Demo-only: return token directly (no email flow)
-    return {"ok": True, "reset_token": token}
+    try:
+        send_password_reset_email(user.email, token)
+    except Exception as exc:
+        # Keep the flow usable even when SMTP isn't configured.
+        return {
+            "ok": True,
+            "reset_token": token,
+            "message": "Reset token generated, but email delivery failed. Check SMTP settings.",
+            "email_error": str(exc),
+        }
+
+    return {
+        "ok": True,
+        "message": "A reset token has been sent to your email address.",
+    }
 
 
 @router.post("/reset-password")
@@ -121,6 +144,11 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     if not prt or prt.used:
         raise HTTPException(status_code=400, detail="Invalid or used reset token")
 
+    if prt.created_at and datetime.utcnow() - prt.created_at > timedelta(hours=1):
+        prt.used = True
+        db.commit()
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+
     user = db.scalar(select(User).where(User.id == prt.user_id))
     if not user:
         raise HTTPException(status_code=400, detail="Invalid reset token")
@@ -128,5 +156,5 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     user.password_hash = hash_password(payload.new_password)
     prt.used = True
     db.commit()
-    return {"ok": True}
+    return {"ok": True, "message": "Password updated successfully"}
 

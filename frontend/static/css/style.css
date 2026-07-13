@@ -4,6 +4,78 @@
   box-sizing: border-box;
 }
 
+.result-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.result-meta-grid strong {
+  display: block;
+  color: #94a3b8;
+  font-size: 11px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.result-meta-grid p {
+  margin: 0;
+  color: #e0e0e0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.result-answer {
+  min-height: 220px;
+  color: #e0e0e0;
+}
+
+.answer-heading {
+  margin-top: 24px;
+  margin-bottom: 14px;
+  font-size: 18px;
+  color: #4ade80;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.answer-list {
+  margin: 0 0 18px 22px;
+  padding-left: 18px;
+  color: #d2dce5;
+}
+
+.answer-list li {
+  margin: 8px 0;
+  line-height: 1.9;
+}
+
+.answer-paragraph {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #d7dee8;
+  line-height: 1.85;
+}
+
+.answer-quote {
+  margin: 16px 0;
+  padding: 14px 18px;
+  border-left: 4px solid #4ade80;
+  background: rgba(74, 222, 128, 0.07);
+  color: #c7d9e5;
+  font-style: italic;
+  line-height: 1.8;
+}
+
+.answer-bullet {
+  margin: 10px 0 0 16px;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.7;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: radial-gradient(circle at top, rgba(74, 222, 128, 0.12), transparent 28%), linear-gradient(180deg, #0f1419 0%, #080b10 100%);

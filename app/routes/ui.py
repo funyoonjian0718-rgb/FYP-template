@@ -26,6 +26,17 @@ def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 
+@router.get("/forgot-password", response_class=HTMLResponse, include_in_schema=False)
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+
+
+@router.get("/reset-password", response_class=HTMLResponse, include_in_schema=False)
+def reset_password_page(request: Request):
+    token = request.query_params.get("token", "")
+    return templates.TemplateResponse("reset_password.html", {"request": request, "token": token})
+
+
 @router.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
 def dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
@@ -34,6 +45,11 @@ def dashboard_page(request: Request):
 @router.get("/ask", response_class=HTMLResponse, include_in_schema=False)
 def ask_page(request: Request):
     return templates.TemplateResponse("ask.html", {"request": request})
+
+
+@router.get("/results", response_class=HTMLResponse, include_in_schema=False)
+def results_page(request: Request):
+    return templates.TemplateResponse("results.html", {"request": request})
 
 
 @router.get("/history", response_class=HTMLResponse, include_in_schema=False)

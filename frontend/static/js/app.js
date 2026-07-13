@@ -17,46 +17,78 @@ function escapeHtml(s) {
 }
 
 function formatAnswer(text) {
-  let safe = escapeHtml(text || '');
+  const safe = escapeHtml(text || '');
+  const lines = safe.split('\n');
 
-  const headings = [
-    'Summary Recommendation',
-    'Why (Based on Retrieved Context)',
-    'Better Alternatives (From Retrieved Sources)',
-    'Portion Guidance (From Retrieved Context)',
-    'Budget Guidance',
-    'Sources Used',
-    'Health Disclaimer',
-    'Validation Notes',
-    'References (from RAG)'
-  ];
+  const html = [];
+  let listOpen = false;
+  let listType = 'ul';
 
-  function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
+  const closeList = () => {
+    if (listOpen) {
+      html.push(`</${listType}>`);
+      listOpen = false;
+      listType = 'ul';
+    }
+  };
 
-  for (const heading of headings) {
-    const regex = new RegExp(`\\s*${escapeRegex(heading)}:`, 'g');
-    safe = safe.replace(regex, `\n\n<h3 class="answer-heading">${heading}</h3>`);
-  }
+  const pushHeading = (content) => {
+    closeList();
+    html.push(`<h3 class="answer-heading">${content}</h3>`);
+  };
 
-  safe = safe
-    .replace(/\s+•\s+/g, '\n<div class="answer-bullet">• ')
-    .replace(/\s+-\s+/g, '\n<div class="answer-bullet">- ')
-    .replace(/\s+(\d+)\.\s+/g, '\n<div class="answer-bullet">$1. ');
+  const pushParagraph = (content) => {
+    closeList();
+    html.push(`<p class="answer-paragraph">${content}</p>`);
+  };
 
-  safe = safe
-    .split('\n')
-    .map((line) => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('<div class="answer-bullet">') && !trimmed.endsWith('</div>')) {
-        return `${trimmed}</div>`;
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      closeList();
+      continue;
+    }
+
+    const headingMatch = line.match(/^\*\*\s*(.+?)\s*\*\*\s*:?$/);
+    const listMatch = line.match(/^([*+\-])\s+(.+)$/);
+    const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+    const quoteMatch = line.match(/^>\s+(.+)$/);
+
+    if (headingMatch) {
+      pushHeading(headingMatch[1]);
+      continue;
+    }
+
+    if (quoteMatch) {
+      closeList();
+      html.push(`<blockquote class="answer-quote">${quoteMatch[1]}</blockquote>`);
+      continue;
+    }
+
+    if (listMatch || numberedMatch) {
+      const itemText = listMatch ? listMatch[2] : numberedMatch[2];
+      const currentType = numberedMatch ? 'ol' : 'ul';
+
+      if (!listOpen || listType !== currentType) {
+        closeList();
+        listOpen = true;
+        listType = currentType;
+        html.push(`<${listType} class="answer-list">`);
       }
-      return line;
-    })
-    .join('\n');
+      html.push(`<li>${itemText}</li>`);
+      continue;
+    }
 
-  return `<div class="answer-section answer-text">${safe}</div>`;
+    if (/^[A-Z][A-Za-z ]{2,}:$/.test(line) || /^Sources Used|^References from RAG|^Summary Recommendation|^Meal Plan|^Budget Guidance|^Nutrition \/ Health Reasoning|^Foods to Avoid|^Better Alternatives|^Comparison \/ Ranking/i.test(line)) {
+      pushHeading(line.replace(/:$/, ''));
+      continue;
+    }
+
+    pushParagraph(line);
+  }
+
+  closeList();
+  return `<div class="answer-section answer-text">${html.join('')}</div>`;
 }
 
 async function api(path, { method = 'GET', body = null } = {}) {
@@ -287,7 +319,19 @@ async function askQuestion() {
     const data = await api('/diet/query', { method: 'POST', body: payload });
 
     if (answerEl) {
-      answerEl.innerHTML = formatAnswer(data.formatted_answer || '');
+      sessionStorage.setItem(
+        'last_ai_result',
+        JSON.stringify({
+          query_text: payload.query_text,
+          selected_food: payload.selected_food,
+          portion: payload.portion,
+          free_text_food: payload.free_text_food,
+          answer: data.formatted_answer || '',
+          references: data.references || [],
+        })
+      );
+      window.location.href = '/results';
+      return;
     }
 
     if (refsEl) {
@@ -363,6 +407,51 @@ async function initAsk() {
   await loadFoods();
 }
 
+function formatAnswerFromText(text) {
+  return formatAnswer(text);
+}
+
+function loadResultPage() {
+  const result = sessionStorage.getItem('last_ai_result');
+  const pageBody = $('resultBody');
+  const queryText = $('resultQueryText');
+  const selectedFood = $('resultSelectedFood');
+  const portion = $('resultPortion');
+  const freeFood = $('resultFreeFood');
+  const answerEl = $('answer');
+  const refsEl = $('refs');
+
+  if (!result) {
+    if (pageBody) {
+      pageBody.innerHTML = '<div class="alert alert-error">No result data found. Please ask a question first.</div>';
+    }
+    return;
+  }
+
+  const data = JSON.parse(result);
+
+  if (queryText) queryText.textContent = data.query_text || 'No question provided';
+  if (selectedFood) selectedFood.textContent = data.selected_food || 'None';
+  if (portion) portion.textContent = data.portion || 'Not set';
+  if (freeFood) freeFood.textContent = data.free_text_food || 'None';
+  if (answerEl) answerEl.innerHTML = formatAnswer(data.answer || 'No answer available.');
+
+  if (refsEl) {
+    const refs = data.references || [];
+    refsEl.innerHTML = refs.length
+      ? refs
+          .map(
+            (r) => `
+            <div class="reference-card">
+              <div class="reference-source">📄 ${escapeHtml(r.source || '')}</div>
+              <div class="reference-snippet">${escapeHtml(r.snippet || '')}</div>
+            </div>`
+          )
+          .join('')
+      : '<div class="alert alert-warning">No references retrieved</div>';
+  }
+}
+
 async function initHistory() {
   if (!ensureAuth()) return;
   await loadCurrentUser();
@@ -393,3 +482,5 @@ window.initProfile = initProfile;
 window.setToken = setToken;
 window.setUser = setUser;
 window.formatAnswer = formatAnswer;
+window.formatAnswerFromText = formatAnswerFromText;
+window.loadResultPage = loadResultPage;
